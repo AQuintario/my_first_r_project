@@ -182,7 +182,7 @@ apply(X = df[, c("mpg", "cyl")], MARGIN = 2, FUN = my_second_function, n = 3)
 
 
 # data.table --------------------------------------------------------------
-install.packages("data.table")
+# install.packages("data.table")
 library(data.table) # library es equivalente a import en python
 
 dt <- as.data.table(df, keep.rownames = T)
@@ -210,6 +210,8 @@ dt[i, j, by]# i: filas, j: cols, by
 dt[, unique(gear)]
 dt[, .(mpg_m = mean(mpg)), by = gear]
 dt[gear==4, mean(mpg)]
+
+dt[, .(mpg_m = mean(mpg)), by = gear][mpg_m>20]
 
 unique(dt[, .(gear, carb)])
 dt[, .(mpg_m = mean(mpg)), by = .(gear, carb)]
@@ -276,13 +278,12 @@ dt_nas <- readRDS("data/dt_nas.RDS")
 
 
 # Regex en R --------------------------------------------------------------
-
-
 grep(pattern = "\\bo.+ ",
      x = c("The same operation is done with Data.table as follows:",
            "As we see from the examples"),
      value = T)
-gsub(pattern = "same", replacement = "SAME", x = "The same operation is done with Data.table as follows:")
+gsub(pattern = "same", replacement = "SAME",
+     x = "The same operation is done with Data.table as follows:")
 
 library(stringr)
 
@@ -305,8 +306,6 @@ dt$rn %in% sel_models
 dt[rn %in% sel_models]
 dt[!(rn %in% sel_models)]
 
-library(okutools)
-okutools::`%notin%`
 `%notin%` <- function (x, y) 
 {
   !(x %in% y)
@@ -321,6 +320,61 @@ dt[, .SD, .SDcols = patterns("^d")]
 
 
 
+# Tidyverse ---------------------------------------------------------------
+library(tidyverse)
+# dplyr::between()
+# data.table::between()
+# Cuidado con las funciones que estan en varias librerias, no cargar a lo locooo
+
+# purrrrr
+dt[, bool_var := rep(c(T, F), 16)]
+map(.x = dt, .f = is.logical)
+
+# dplyr
+# data.frame
+df[df$mpg > 20]
+
+# data.table:
+dt[mpg > 20]
+
+# tidyverse
+filter(dt, mpg > 20)
+dt %>%
+  filter(mpg > 20) %>% 
+  filter(cyl==4)
+
+# dt %>%
+#   filter(mpg > 20 & cyl == 4)
+# no tidy, marie kondo doesn't approve
+
+dt[
+  mpg > 20 ][
+  cyl == 4
+]
+
+# ggplot2
+library(ggplot2)
+data("mtcars")
+dt <- as.data.table(mtcars)
+
+dt[, cyl2 := as.character(cyl)]
+ggplot(data = dt,
+       mapping = aes(x = mpg, y = qsec, color = cyl2)) +
+  # geom_line()
+  geom_point() 
+# ggsave("puntitos.jpg")
+
+
+
+# Dates -------------------------------------------------------------------
+as.Date("26/06/2021", format = "%d/%m/%Y")
+library(zoo)
+library(lubridate)
+
+as.Date("26/06/2021", format = "%d/%m/%Y") %>% 
+  zoo::as.yearmon()
+
+as.Date("26/06/2021", format = "%d/%m/%Y") + 1
 
 
 
